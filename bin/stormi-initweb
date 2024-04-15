@@ -1,0 +1,44 @@
+#!/bin/bash
+scriptDir="$(dirname "$0")"
+if [ ! -d "$PWD/appserverset" ]; then
+    mkdir -p "$PWD/appserverset"
+fi
+
+if [ ! -f "$PWD/app.yaml" ]; then
+    echo "not have app.yaml in current path. please execute stormi init"
+    exit 1
+fi
+
+url=$(grep -o 'url:[[:space:]]*[^ ]*' app.yaml | cut -d':' -f2-)
+password=$(grep -o 'password:[[:space:]]*[^ ]*' app.yaml | cut -d':' -f2-)
+
+if [ -z "$1" ]; then
+    echo "No second parameter provided."
+    exit 1
+fi
+
+if [ -d "$PWD/$1" ]; then
+    echo "Error: directory $1 exists"
+    exit 1
+fi
+
+mkdir "$PWD/$1"
+cp -r "$scriptDir/assets/StormiWeb/"* "$PWD/$1/"
+
+cp "$PWD/appserverset/"* "$PWD/$1/server/rpcProtos" 
+
+rm "$PWD/$1/app.yaml"
+
+echo "stormi:" >> "$PWD/$1/app.yaml"
+echo "    redis:" >> "$PWD/$1/app.yaml"
+echo "        url:$url" >> "$PWD/$1/app.yaml"
+echo "        password:$password" >> "$PWD/$1/app.yaml"
+echo "    server:" >> "$PWD/$1/app.yaml"
+echo "        name: $1" >> "$PWD/$1/app.yaml"
+echo "        port: $2" >> "$PWD/$1/app.yaml"
+
+echo "please enter: $PWD/$1/web"
+
+"$scriptDir/stormi-init" "$1"
+
+exit 0

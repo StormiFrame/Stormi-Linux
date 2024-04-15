@@ -1,0 +1,19 @@
+#!/bin/bash
+
+output=$(cd .. && cd .. && pwd)
+workbenchpath=${output%/*}
+appserversetpath="$workbenchpath/appserverset"
+cp $appserversetpath/* "$PWD"
+
+for file in *.proto; do
+    filename="${file%.*}"
+    foldername="ProtoCode/$filename"
+
+    if [ ! -d "$foldername" ]; then
+        mkdir -p "$foldername"
+    fi
+
+    protoc --go_out="$foldername" "$file"
+    protoc --go-grpc_out="$foldername" "$file"
+done
+"stormi-serversetinit" $PWD

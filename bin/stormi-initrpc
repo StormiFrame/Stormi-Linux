@@ -1,0 +1,60 @@
+#!/bin/bash
+
+yamlFile="app.yaml"
+url="localhost:6379"
+password=""
+scriptDir="$(dirname "$0")"
+
+if [ ! -d "$PWD/appserverset" ]; then
+    mkdir -p "$PWD/appserverset"
+fi
+
+if [ ! -f "$PWD/app.yaml" ]; then
+    echo "not have app.yaml in current path. please execute stormi init"
+    exit 1
+fi
+
+if [ -z "$1" ]; then
+    echo "No second parameter provided."
+    exit 1
+fi
+
+if [ -d "$PWD/$1" ]; then
+    echo "Error: directory $1 exists"
+    exit 1
+fi
+
+mkdir "$PWD/$1"
+cp -r "$scriptDir/assets/StormiRpc/"* "$PWD/$1/"
+
+cp -r "$PWD/appserverset/"* "$PWD/$1/server/rpcProtos"
+
+rm "$PWD/$1/app.yaml"
+
+echo "stormi:" >> "$PWD/$1/app.yaml"
+echo "    redis:" >> "$PWD/$1/app.yaml"
+echo "        url: $url" >> "$PWD/$1/app.yaml"
+echo "        password: $password" >> "$PWD/$1/app.yaml"
+echo "    server:" >> "$PWD/$1/app.yaml"
+echo "        name: $1" >> "$PWD/$1/app.yaml"
+
+echo "syntax = \"proto3\";" >> "$PWD/$1/server/protos/$1.proto"
+echo "" >> "$PWD/$1/server/protos/$1.proto"
+echo "option go_package = \".;$1\";" >> "$PWD/$1/server/protos/$1.proto"
+echo "" >> "$PWD/$1/server/protos/$1.proto"
+echo "service $1{" >> "$PWD/$1/server/protos/$1.proto"
+echo "  rpc FuncName($1Request) returns ($1Response){}" >> "$PWD/$1/server/protos/$1.proto"
+echo "}" >> "$PWD/$1/server/protos/$1.proto"
+echo "" >> "$PWD/$1/server/protos/$1.proto"
+echo "message $1Request{" >> "$PWD/$1/server/protos/$1.proto"
+echo "  string requestMsg = 1;" >> "$PWD/$1/server/protos/$1.proto"
+echo "}" >> "$PWD/$1/server/protos/$1.proto"
+echo "" >> "$PWD/$1/server/protos/$1.proto"
+echo "message $1Response{" >> "$PWD/$1/server/protos/$1.proto"
+echo "  string responseMsg = 1;" >> "$PWD/$1/server/protos/$1.proto"
+echo "}" >> "$PWD/$1/server/protos/$1.proto"
+echo "please enter: $PWD/$1/server/protos"
+
+"$scriptDir/stormi-init" "$1"
+
+exit 0

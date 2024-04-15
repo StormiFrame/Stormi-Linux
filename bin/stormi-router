@@ -1,0 +1,94 @@
+#!/bin/bash
+
+routerPath="$PWD/routers/$1Router.go"
+implPath="$PWD/impl/$1RouterImpl/$1RouterImpl.go"
+startPath="$PWD/start/Start.go"
+registerPath="$PWD/routers/Register/RouterRegister.go"
+
+if [ -f "$routerPath" ]; then
+    echo "$routerPath exists"
+    exit 1
+fi
+if [ -f "$implPath" ]; then
+    echo "$implPath exists"
+    exit 1
+fi
+
+# 如果目录不存在，则创建目录
+mkdir -p "$PWD/routers"
+mkdir -p "$PWD/impl/$1RouterImpl"
+mkdir -p "$PWD/start"
+mkdir -p "$PWD/routers/Register"
+
+# 生成路由文件内容
+cat > "$routerPath" <<EOL
+package routers
+import (
+    "Stormi/stormi"
+    $1RouterImpl "Stormi/web/impl/$1RouterImpl"
+)
+func $1Router() {
+    r := stormi.GetEngine()
+
+    router := r.Group("/$1")
+    {
+        router.GET("/Get", $1RouterImpl.$1Get)
+        router.PUT("/Put", $1RouterImpl.$1Put)
+        router.POST("/Post", $1RouterImpl.$1Post)
+        router.DELETE("/Delete", $1RouterImpl.$1Delete)
+    }
+}
+EOL
+
+# 生成实现文件内容
+cat > "$implPath" <<EOL
+package $1RouterImpl
+import (
+    "net/http"
+    "github.com/gin-gonic/gin"
+)
+func $1Get(ctx *gin.Context) {
+    ctx.String(http.StatusOK, "$1 Get")
+}
+func $1Put(ctx *gin.Context) {
+    ctx.String(http.StatusOK, "$1 Put")
+}
+func $1Post(ctx *gin.Context) {
+    ctx.String(http.StatusOK, "$1 Post")
+}
+func $1Delete(ctx *gin.Context) {
+    ctx.String(http.StatusOK, "$1 Delete")
+}
+EOL
+
+# 生成启动文件内容
+if [ ! -f "$startPath" ]; then
+    cat > "$startPath" <<EOL
+package main
+
+import (
+    "Stormi/stormi"
+    register "Stormi/web/routers/Register"
+)
+
+func main() {
+    register.Register()
+    stormi.GetEngine().Run(":" + stormi.GetPort())
+}
+EOL
+fi
+
+# 生成注册文件内容
+if [ ! -f "$registerPath" ]; then
+    cat > "$registerPath" <<EOL
+package register
+
+import "Stormi/web/routers"
+
+func Register() {
+}
+EOL
+fi
+
+# 调用 stormi-routerregister 脚本
+"stormi-routerregister" "$registerPath" "$1"

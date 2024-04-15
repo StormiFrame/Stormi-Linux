@@ -1,0 +1,160 @@
+#!/bin/bash
+
+error_message="Error: please make sure file name, package name, service name, response and request prefix name are the same."
+
+for file in *.proto; do
+    filename="${file%.*}"
+    last_six_chars="${filename: -6}"
+    
+    if [ "$last_six_chars" = "Server" ]; then
+        error_message="Error: file name can not end with Server"
+        echo "$error_message file: $file"
+        exit 1
+        elif [ "$last_six_chars" = "server" ]; then
+        error_message="Error: file name can not end with server"
+        echo "$error_message file: $file"
+        exit 1
+    fi
+    
+    grep -n -i "option go_package = \".;$filename\";" "$file" >> temp_proto_check.tmp
+    grep -n -i "service $filename{" "$file" >> temp_proto_check.tmp
+    grep -n -i "message ${filename}Request{" "$file" >> temp_proto_check.tmp
+    grep -n -i "message ${filename}Response{" "$file" >> temp_proto_check.tmp
+    
+    grep -c "option go_package = \".;$filename\";" temp_proto_check.tmp > /dev/null || {
+        echo "$error_message File: $file"
+        echo "please change to: option go_package = \".;$filename\";"
+        rm temp_proto_check.tmp
+        exit 1
+    }
+    grep -c "service $filename{" temp_proto_check.tmp > /dev/null || {
+        echo "$error_message File: $file"
+        echo "please change to: service $filename"
+        rm temp_proto_check.tmp
+        exit 1
+    }
+    grep -c "message ${filename}Request{" temp_proto_check.tmp > /dev/null || {
+        echo "$error_message File: $file"
+        echo "please change to: message ${filename}Request"
+        rm temp_proto_check.tmp
+        exit 1
+    }
+    grep -c "message ${filename}Response{" temp_proto_check.tmp > /dev/null || {
+        echo "$error_message File: $file"
+        echo "please change to: message ${filename}Response"
+        rm temp_proto_check.tmp
+        exit 1
+    }
+    rm temp_proto_check.tmp
+done
+
+folder="Impl"
+
+[ ! -d "$folder" ] && mkdir "$folder"
+
+for file in *.proto; do
+    filename="${file%.*}"
+    impl_filename="${filename}Impl.go"
+    
+    if [  ! -f "${folder}/$impl_filename" ]; then
+        echo "package Impl" > "${folder}/$impl_filename"
+        echo  >> "${folder}/$impl_filename"
+        echo "import (" >> "${folder}/$impl_filename"
+        echo "    \"Stormi/server/protos/ProtoCode/"${filename}"\"" >> "${folder}/$impl_filename"
+        echo "    \"context\"" >> "${folder}/$impl_filename"
+        echo  >> "${folder}/$impl_filename"
+        echo "    \"google.golang.org/grpc/codes\"" >> "${folder}/$impl_filename"
+        echo "    \"google.golang.org/grpc/status\"" >> "${folder}/$impl_filename"
+        echo ")" >> "${folder}/$impl_filename"
+        echo  >> "${folder}/$impl_filename"
+        echo "type ${filename}Impl struct {" >> "${folder}/$impl_filename"
+        echo "    ${filename}.Unimplemented${filename}Server" >> "${folder}/$impl_filename"
+        echo "}" >> "${folder}/$impl_filename"
+        echo  >> "${folder}/$impl_filename"
+        input_file="$file"
+        
+        # 检查文件是否存在
+        if [ ! -f "$input_file" ]; then
+            echo "File $input_file not found."
+            exit 1
+        fi
+        
+        # 初始化存储符合条件行的变量
+        rpc_lines=""
+        
+        # 逐行读取文件内容
+        while IFS= read -r line; do
+            # 去除行首空格
+            trimmed_line=$(echo "$line" | sed 's/^\s*//')
+            
+            # 如果以 "rpc" 开头，则进行截取操作
+            if [[ "${trimmed_line:0:3}" == "rpc" ]]; then
+                rpc_lines="$rpc_lines$trimmed_line\n"
+                if [[ "$trimmed_line" =~ rpc\ (.*)\( ]]; then
+                    extracted_content="${BASH_REMATCH[1]}"
+                    extracted_content="${extracted_content%%(*}"
+                    echo func \(impl *${filename}Impl\) $extracted_content\(ctx context.Context, req *${filename}.${filename}Request\) \(*${filename}.${filename}Response, error\) \{>> "${folder}/$impl_filename"
+                    echo "    return nil, status.Errorf(codes.Unimplemented, "\"method "$extracted_content" not Implemented\"")">> "${folder}/$impl_filename"
+                    echo \}>> "${folder}/$impl_filename"
+                    echo  >> "${folder}/$impl_filename"
+                fi
+            fi
+        done < "$input_file"
+    fi
+    
+    foldername="ProtoCode/$filename"
+    mkdir -p "ProtoCode"
+    mkdir -p "$foldername"
+    protoc --go_out="$foldername" "$file"
+    protoc --go-grpc_out="$foldername" "$file"
+done
+
+goFilePath="RegisterAndStart/RegisterAndStart.go"
+
+rm "$goFilePath" 2>/dev/null
+
+folder="RegisterAndStart"
+
+[ ! -d "$folder" ] && mkdir "$folder"
+
+echo "package main" > "$goFilePath"
+echo >> "$goFilePath"
+echo "import (" >> "$goFilePath"
+echo "    \"Stormi/stormi\"" >> "$goFilePath"
+echo "    \"Stormi/server/protos/Impl\"" >> "$goFilePath"
+
+for file in *.proto; do
+    filename="${file%.*}"
+    echo "    \"Stormi/server/protos/ProtoCode/$filename\"" >> "$goFilePath"
+done
+echo ")" >> "$goFilePath"
+echo >> "$goFilePath"
+echo "func main() {" >> "$goFilePath"
+echo "    rpc := stormi.GetStormiRpc()" >> "$goFilePath"
+
+for dir in ProtoCode/*; do
+    service_name=$(basename "$dir")
+    echo "    $service_name.Register${service_name}Server(rpc, &Impl.${service_name}Impl{})" >> "$goFilePath"
+done
+for dir in ProtoCode/*; do
+    service_name=$(basename "$dir")
+    echo "    stormi.RegisterWithName(\""${service_name}"\")" >> "$goFilePath"
+done
+
+echo "    stormi.StartServer()" >> "$goFilePath"
+echo "}" >> "$goFilePath"
+
+currentPath=$(pwd)
+
+workbenchpath=${currentPath%/*}
+
+workbenchpath=${workbenchpath%/*}
+
+workbenchpath=${workbenchpath%/*}
+
+workbenchpath="$workbenchpath/appserverset"
+
+[ ! -d "$workbenchpath" ] && mkdir "$workbenchpath"
+
+cp *.proto "$workbenchpath" 2>/dev/null
+

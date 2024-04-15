@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# 设置文件编码为 UTF-8
+export LANG=en_US.UTF-8
+
+# 获取脚本所在目录
+scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# 调用 stormi-checkcommand 脚本，并传递第一个参数
+"$scriptDir/stormi-checkcommand" "$1"
+
+# 处理不同的指令
+case "$1" in
+    version)
+        echo "stormi-linux-1.1.0"
+        exit
+    ;;
+    init)
+        cp "$scriptDir/app.yaml" "$PWD"
+        if [ ! -d "appserverset" ]; then
+            mkdir appserverset
+        fi
+        exit
+    ;;
+    rpc)
+        "stormi-checkworkbench"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checkfirstnumber" "$2"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checkcapitalization" "$2"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checksuffix" "$2"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "$scriptDir/stormi-initrpc" "$2"
+        exit
+    ;;
+    web)
+        "stormi-checkworkbench"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checkfirstnumber" "$2"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checkcapitalization" "$2"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checksuffix" "$2"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "stormi-checkport" "$3"
+        if [[ $? -eq 1 ]]; then
+            exit
+        fi
+        "$scriptDir/stormi-initweb" "$2" "$3"
+        exit
+    ;;
+    gen)
+        dir_name="$(basename "$PWD")"
+        case "$dir_name" in
+            protos)
+                if [[ $2 != "" ]]; then
+                    echo current_dir is not web_dir
+                    exit
+                fi
+                "$scriptDir/stormi-gen"
+                exit
+            ;;
+            rpcProtos)
+                if [[ $2 != "" ]]; then
+                    echo current_dir is not web_dir
+                    exit
+                fi
+                "$scriptDir/stormi-refresh"
+                exit
+            ;;
+            web)
+                "$scriptDir/stormi-checkfirstnumber" "$2"
+                if [[ $? -eq 1 ]]; then
+                    exit
+                fi
+                "$scriptDir/stormi-checkcapitalization" "$2"
+                if [[ $? -eq 1 ]]; then
+                    exit
+                fi
+                "$scriptDir/stormi-router" "$2"
+                exit
+            ;;
+            *)
+                echo "only in protos, rpcProtos, web directory can run gen command."
+                exit 1
+            ;;
+        esac
+    ;;
+    run)
+        dir_name="$(basename "$PWD")"
+        case "$dir_name" in
+            protos)
+                go run ./RegisterAndStart/RegisterAndStart.go
+                exit
+            ;;
+            rpcProtos)
+                go run ./Test/Test.go
+                exit
+            ;;
+            web)
+                go run ./start/Start.go
+                exit
+            ;;
+            RegisterAndStart)
+                go run RegisterAndStart.go
+                exit
+            ;;
+            Test)
+                go run Test.go
+                exit
+            ;;
+            start)
+                go run Start.go
+                exit
+            ;;
+            *)
+                echo "only run RegisterAndStart.go, Test.go, Start.go within current path."
+                exit 1
+            ;;
+        esac
+    ;;
+    *)
+        echo "Unknown command: $1"
+        exit 1
+    ;;
+esac

@@ -1,0 +1,72 @@
+#!/bin/bash
+goFilePath="$1/ServerSet/ServerSet.go"
+if [ -f "$goFilePath" ]; then
+    rm "$goFilePath"
+fi
+mkdir -p "$1/ServerSet"
+
+cat <<EOF > "$goFilePath"
+package ServerSet
+
+import (
+    "Stormi/stormi"
+    "time"
+EOF
+
+protoPath="$1"
+
+proto_files=$(find "$protoPath" -type f -name "*.proto" -exec basename {} .proto \;)
+
+
+# 输出所有 .proto 文件的文件名
+for file in $proto_files; do
+    echo "    \"Stormi/server/rpcProtos/ProtoCode/"$file"\"" >> "$goFilePath"
+done
+
+
+cat <<EOF >> "$goFilePath"
+)
+
+var (
+EOF
+proto_files=$(find "$protoPath" -type f -name "*.proto" -exec basename {} .proto \;)
+
+# 输出所有 .proto 文件的文件名
+for file in $proto_files; do
+    echo "    "$file"Call "$file"."$file"Client" >> "$goFilePath"
+done
+
+cat <<EOF >> "$goFilePath"
+)
+
+func init() {
+    var CloudServerName string
+EOF
+
+proto_files=$(find "$protoPath" -type f -name "*.proto" -exec basename {} .proto \;)
+
+# 输出所有 .proto 文件的文件名
+for file in $proto_files; do
+    echo "    CloudServerName = \""$file"\"" >> "$goFilePath"
+    echo  "    "$file"Call = "$file".New"$file"Client(stormi.GetCloudConn(CloudServerName))" >> "$goFilePath"
+done
+
+cat <<EOF >> "$goFilePath"
+    go func() {
+        for {
+EOF
+
+proto_files=$(find "$protoPath" -type f -name "*.proto" -exec basename {} .proto \;)
+
+# 输出所有 .proto 文件的文件名
+for file in $proto_files; do
+    echo "            CloudServerName = "\"$file"\"" >> "$goFilePath"
+    echo "            "$file"Call = "$file".New"$file"Client(stormi.GetCloudConn(CloudServerName))" >> "$goFilePath"
+done
+
+cat <<EOF >> "$goFilePath"
+            time.Sleep(3 * time.Second)
+        }
+    }()
+}
+EOF

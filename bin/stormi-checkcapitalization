@@ -1,0 +1,89 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "no second parameter provided"
+    exit 1
+fi
+
+input="$1"
+firstLetter="${input:0:1}"
+
+if [ "$firstLetter" = "a" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "b" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "c" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "d" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "e" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "f" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "g" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "h" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "i" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "j" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "k" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "l" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "m" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "n" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "o" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "p" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "q" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "r" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "s" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "t" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "u" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "v" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "w" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "x" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "y" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+elif [ "$firstLetter" = "z" ]; then
+    echo "The first letter must be capitalized"
+    exit 1
+fi

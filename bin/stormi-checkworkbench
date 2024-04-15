@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ ! -e "appserverset" ] || [ ! -e "app.yaml" ]; then
+    echo "The current directory is not a working directory. You can run 'stormi init' to change the current directory to a working directory or enter the working directory to run the current command."
+    exit 1
+fi

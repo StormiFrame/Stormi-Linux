@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "no third parameter provided"
+    exit 1
+fi
+
+input="$1"
+
+if [ "${#input}" -ne 4 ]; then
+    echo "port invalid must be 8000-9999"
+    exit 1
+fi
+
+for ((i=0; i<${#input}; i++)); do
+    digit="${input:i:1}"
+    if ! [[ $digit =~ ^[0-9]$ ]]; then
+        echo "port invalid must be 8000-9999"
+        exit 1
+    fi
+done
+
+if [ "${input:0:1}" != "8" ] && [ "${input:0:1}" != "9" ]; then
+    echo "port invalid must be 8000-9999"
+    exit 1
+fi

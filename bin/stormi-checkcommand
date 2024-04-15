@@ -1,0 +1,10 @@
+#!/bin/bash
+
+case "$1" in
+    "version" | "init" | "rpc" | "web" | "gen" | "run")
+        ;;
+    *)
+        echo "invalid command"
+        exit 1
+        ;;
+esac

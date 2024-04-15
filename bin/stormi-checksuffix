@@ -1,0 +1,16 @@
+#!/bin/bash
+
+filename="$1"
+last_six_chars="${filename:(-6)}"
+
+error_message="Error: file name can not end with Server"
+if [ "$last_six_chars" = "Server" ]; then
+    echo "$error_message"
+    exit 1
+fi
+
+error_message="Error: file name can not end with server"
+if [ "$last_six_chars" = "server" ]; then
+    echo "$error_message"
+    exit 1
+fi

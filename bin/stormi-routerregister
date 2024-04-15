@@ -1,0 +1,31 @@
+#!/bin/bash
+
+temp="$1temp.txt"
+if [ -f "$temp" ]; then
+    rm "$temp"
+fi
+
+cat <<EOF > "$temp"
+package register
+
+import "Stormi/web/routers"
+
+func Register() {
+EOF
+
+if [ ! -f "$1" ]; then
+    exit 1
+fi
+
+file_list=$(find routers/ -type f -name "*Router.go" -exec basename {} \;)
+
+# 使用循环逐个显示文件名（去掉 .go 后缀）
+for file in $file_list; do
+    filename_without_extension="${file%.go}"
+    echo "    routers.${filename_without_extension}()" >> "$temp"
+done
+
+echo "}" >> "$temp"
+
+rm "$1"
+mv "$temp" "routers/Register/RouterRegister.go"
