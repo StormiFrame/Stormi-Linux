@@ -1,0 +1,19 @@
+#!/bin/bash
+# 获取脚本执行前的位置
+original_dir=$(pwd)
+
+for dir in */; do
+    # 去除末尾的斜杠，仅保留文件夹名
+    dir="${dir%/}"
+    cd "$dir" || continue  # 进入目录，如果失败则继续下一个循环
+    
+    if [ -f "processid" ]; then
+        pid=$(cat processid)
+        pid_int=$((pid))
+        echo terminating $dir server ......
+        kill $pid_int
+    fi
+    
+    # 返回脚本执行前的位置
+    cd "$original_dir" || exit
+done

@@ -104,6 +104,12 @@ case "$1" in
         esac
     ;;
     run)
+        if [ -d "appserverset" ]; then
+            if [ -f "app.yaml" ]; then
+                stormi-runall
+                exit
+            fi
+        fi
         dir_name="$(basename "$PWD")"
         case "$dir_name" in
             protos)

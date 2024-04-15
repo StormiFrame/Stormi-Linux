@@ -1,6 +1,7 @@
 install:
 	@cp -rf bin/* /usr/bin
 	@chmod +x /usr/bin/*
+	@echo install complete
 	@stormi version
 
 uninstall:
