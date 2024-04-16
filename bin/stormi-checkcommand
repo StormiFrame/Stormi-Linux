@@ -1,7 +1,7 @@
 #!/bin/bash
 
 case "$1" in
-    "version" | "init" | "rpc" | "web" | "gen" | "run" | "x")
+    "version" | "init" | "rpc" | "web" | "gen" | "run" | "run-" | "x")
         ;;
     *)
         echo "invalid command"

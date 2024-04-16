@@ -28,4 +28,4 @@ if [ "$flag" -eq 0 ]; then
     exit 0
 fi
 
-stormi-serversetinit $PWD/$1/server/rpcProtos
+stormi-initserverset $PWD/$1/server/rpcProtos

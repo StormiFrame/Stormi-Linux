@@ -1,0 +1,29 @@
+#!/bin/bash
+for dir in */; do
+    # 去除末尾的斜杠，仅保留文件夹名
+    dir="${dir%/}"
+    cd "$dir"
+    for second_dir in */; do
+        second_dir="${second_dir%/}"
+        if [ "$second_dir" = "web" ];then
+            if [ -f "$second_dir/start/Start.go" ];then
+                nohup go run $second_dir/start/Start.go >/dev/null 2>&1 &
+                echo $dir web server start ......
+            fi
+        fi
+        if [ "$second_dir" = "server" ];then
+            if [ -f "server/protos/RegisterAndStart/RegisterAndStart.go" ];then
+                nohup go run server/protos/RegisterAndStart/RegisterAndStart.go >/dev/null 2>&1 &
+                echo $dir rpc server start ......
+            fi
+        fi
+    done
+    cd - >/dev/null
+done
+
+
+
+
+
+
+

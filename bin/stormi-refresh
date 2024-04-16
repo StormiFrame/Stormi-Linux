@@ -16,4 +16,4 @@ for file in *.proto; do
     protoc --go_out="$foldername" "$file"
     protoc --go-grpc_out="$foldername" "$file"
 done
-"stormi-serversetinit" $PWD
+"stormi-initserverset" $PWD
