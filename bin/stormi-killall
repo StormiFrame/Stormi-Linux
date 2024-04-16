@@ -10,8 +10,10 @@ for dir in */; do
     if [ -f "processid" ]; then
         pid=$(cat processid)
         pid_int=$((pid))
-        echo terminating $dir server ......
-        kill $pid_int
+        if kill -0 "$pid_int" >/dev/null 2>&1; then
+            echo terminating $dir server ......
+            kill $pid_int
+        fi
     fi
     
     # 返回脚本执行前的位置

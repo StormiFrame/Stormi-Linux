@@ -21,12 +21,13 @@ for dir in */; do
     cd - >/dev/null
 done
 
-sleep 5
-
 while true; do
-    read -p " 'x' to terminate all servers:  " userInput
+    read -p "'x' to terminate all servers; '-' to run in the background:  " userInput
     if [ "$userInput" = "x" ]; then
        stormi-killall
+       exit
+    fi
+    if [ "$userInput" = "-" ]; then
        exit
     fi
 done

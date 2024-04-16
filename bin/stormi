@@ -106,6 +106,7 @@ case "$1" in
     run)
         if [ -d "appserverset" ]; then
             if [ -f "app.yaml" ]; then
+                stormi-killall
                 stormi-runall
                 exit
             fi
@@ -141,6 +142,16 @@ case "$1" in
                 exit 1
             ;;
         esac
+    ;;
+    x)
+        if [ -d "appserverset" ]; then
+            if [ -f "app.yaml" ]; then
+                stormi-killall
+                exit
+            fi
+        fi
+        echo current_dir is not working_dir
+        exit
     ;;
     *)
         echo "Unknown command: $1"
